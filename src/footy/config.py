@@ -11,12 +11,31 @@ load_dotenv()
 # --- Paths ---
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
-DATA_DIR.mkdir(exist_ok=True)
+try:
+    DATA_DIR.mkdir(exist_ok=True)
+    # Test writability (Streamlit Cloud repo dir is read-only)
+    _test = DATA_DIR / ".write_test"
+    _test.touch()
+    _test.unlink()
+except OSError:
+    DATA_DIR = Path("/tmp/footy_data")
+    DATA_DIR.mkdir(exist_ok=True)
 DUCKDB_PATH = DATA_DIR / "footy.duckdb"
 
 # --- API Keys ---
-THE_ODDS_API_KEY = os.getenv("THE_ODDS_API_KEY", "")
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+# Reads from .env locally, falls back to Streamlit secrets on Community Cloud
+def _get_secret(key: str) -> str:
+    val = os.getenv(key, "")
+    if not val:
+        try:
+            import streamlit as st
+            val = st.secrets.get(key, "")
+        except Exception:
+            pass
+    return val
+
+THE_ODDS_API_KEY = _get_secret("THE_ODDS_API_KEY")
+ANTHROPIC_API_KEY = _get_secret("ANTHROPIC_API_KEY")
 
 # --- Champion Data ---
 CHAMPION_DATA_BASE_URL = "https://mc.championdata.com/data"
