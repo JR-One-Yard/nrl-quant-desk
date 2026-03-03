@@ -216,6 +216,19 @@ div[data-testid="stMetric"] {{ display: none; }}
 .edge-v {{ border-left-color: {GREEN}; }}
 .edge-f {{ border-left-color: {ROSE}; }}
 
+/* ── Tooltips ────────────────────────────── */
+div[data-testid="stTooltipContent"] {{
+    max-width: 220px !important;
+    font-size: 0.72rem !important;
+    line-height: 1.5 !important;
+    color: {BROWN_LT} !important;
+    font-family: 'Inter', sans-serif !important;
+}}
+div[data-testid="stTooltipContent"] p {{
+    font-size: 0.72rem !important;
+    line-height: 1.5 !important;
+}}
+
 /* ── Empty state ─────────────────────────── */
 .empty {{
     text-align: center; padding: 2.5rem 2rem;
@@ -304,8 +317,8 @@ with st.sidebar:
 
     st.divider()
     st.markdown(f'<div class="section-label">Position Sizing</div>', unsafe_allow_html=True)
-    bankroll = st.number_input("Bankroll ($)", min_value=100, value=1000, step=100, help="Total capital allocated for betting. Used by the Kelly Criterion to size each stake.")
-    edge_threshold = st.slider("Min. edge (%)", 0.0, 10.0, 2.0, 0.5, help="Minimum model-vs-market edge to flag a value bet. Higher = more selective. Try 2–3 % to start.")
+    bankroll = st.number_input("Bankroll ($)", min_value=100, value=1000, step=100, help="Your total betting bankroll. The Kelly Criterion uses this to calculate optimal stake sizes for each bet. Set this to the amount you're comfortable allocating to your betting portfolio.")
+    edge_threshold = st.slider("Min. edge (%)", 0.0, 10.0, 2.0, 0.5, help="The minimum edge (model probability minus market probability) required before a bet is flagged as a value opportunity. Higher values are more conservative — only showing bets where the model strongly disagrees with the market. Start with 2-3% and adjust based on your risk tolerance.")
 
 # ── Load data ────────────────────────────────────────────────────
 odds_df = load_odds(odds_client)
