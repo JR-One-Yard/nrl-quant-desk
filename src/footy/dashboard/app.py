@@ -71,7 +71,7 @@ st.markdown(f"""
 .stApp header {{ background-color: {CREAM}; }}
 .stMainBlockContainer {{ max-width: 1200px; padding-top: 2rem; }}
 #MainMenu, footer, .stDeployButton {{ display: none !important; }}
-.block-container {{ padding-top: 1rem; }}
+.block-container {{ padding-top: 2.5rem; }}
 hr {{ border: none; border-top: 1px solid {BORDER}; margin: 2.5rem 0; }}
 
 /* ── Typography ──────────────────────────── */
@@ -115,6 +115,14 @@ section[data-testid="stSidebar"] label {{
     opacity: 0.8 !important;
     background-color: {BROWN} !important;
     color: {CREAM} !important;
+}}
+/* Override sidebar p/label color bleed into button text */
+section[data-testid="stSidebar"] .stButton > button {{
+    color: {CREAM} !important;
+}}
+section[data-testid="stSidebar"] .stButton > button p {{
+    color: {CREAM} !important;
+    font-size: 0.78rem !important;
 }}
 
 /* ── Hide default metric widget ──────────── */
@@ -192,7 +200,8 @@ div[data-testid="stMetric"] {{ display: none; }}
 }}
 .kpi-v {{
     font-family: 'Source Serif 4', Georgia, serif;
-    font-size: 1.25rem; color: {BROWN};
+    font-size: 1.1rem; color: {BROWN};
+    white-space: nowrap;
 }}
 
 /* ── Prob bar ────────────────────────────── */
@@ -295,8 +304,8 @@ with st.sidebar:
 
     st.divider()
     st.markdown(f'<div class="section-label">Position Sizing</div>', unsafe_allow_html=True)
-    bankroll = st.number_input("Bankroll ($)", min_value=100, value=1000, step=100)
-    edge_threshold = st.slider("Min. edge (%)", 0.0, 10.0, 2.0, 0.5)
+    bankroll = st.number_input("Bankroll ($)", min_value=100, value=1000, step=100, help="Total capital allocated for betting. Used by the Kelly Criterion to size each stake.")
+    edge_threshold = st.slider("Min. edge (%)", 0.0, 10.0, 2.0, 0.5, help="Minimum model-vs-market edge to flag a value bet. Higher = more selective. Try 2–3 % to start.")
 
 # ── Load data ────────────────────────────────────────────────────
 odds_df = load_odds(odds_client)
