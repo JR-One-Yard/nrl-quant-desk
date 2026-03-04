@@ -475,6 +475,87 @@ else:
 
 st.divider()
 
+# ── Elo Power Rankings & Results ─────────────────────────────────
+col_left, col_right = st.columns([3, 2])
+
+with col_left:
+    st.markdown(f'<div class="section-label">Ratings</div>', unsafe_allow_html=True)
+    st.markdown("## Elo Power Rankings")
+
+    ratings_df = elo.get_ratings_df()
+    if not ratings_df.is_empty():
+        data = ratings_df.with_row_index("rank", offset=1)
+        min_r = data["elo_rating"].min()
+        max_r = data["elo_rating"].max()
+        spread = max(max_r - min_r, 1)
+
+        # Plotly horizontal bar — clean Aesop styling
+        teams = data["team"].to_list()
+        ratings = data["elo_rating"].to_list()
+        colors = [GREEN if r > 1500 else ROSE if r < 1500 else TAUPE for r in ratings]
+        short_names = [nick(t) for t in teams]
+
+        fig = go.Figure(go.Bar(
+            x=ratings,
+            y=short_names,
+            orientation="h",
+            marker_color=colors,
+            marker_line_width=0,
+            text=[f"{r:.0f}" for r in ratings],
+            textposition="outside",
+            textfont=dict(family="Inter", size=11, color=BROWN),
+        ))
+        fig.update_layout(
+            yaxis=dict(autorange="reversed", tickfont=dict(family="Inter", size=12, color=BROWN)),
+            xaxis=dict(visible=False, range=[min(1440, min_r - 10), max_r + 40]),
+            height=520,
+            margin=dict(l=110, r=50, t=10, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            bargap=0.35,
+        )
+        fig.add_vline(x=1500, line_dash="dot", line_color=TAUPE, opacity=0.5)
+
+        st.markdown('<div class="card" style="padding:0.75rem 0.5rem">', unsafe_allow_html=True)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="empty">No completed matches yet to build ratings.</div>', unsafe_allow_html=True)
+
+with col_right:
+    st.markdown(f'<div class="section-label">Results</div>', unsafe_allow_html=True)
+    st.markdown("## Completed")
+
+    if not completed_df.is_empty():
+        for row in completed_df.sort("kickoff_utc", descending=True).iter_rows(named=True):
+            h_score = int(row["home_score"]) if row["home_score"] is not None else 0
+            a_score = int(row["away_score"]) if row["away_score"] is not None else 0
+            margin = h_score - a_score
+            winner = nick(row["home_team"]) if margin > 0 else nick(row["away_team"]) if margin < 0 else "Draw"
+
+            st.markdown(f"""
+            <div class="card" style="padding:1rem 1.25rem">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem">
+                    <div style="min-width:0">
+                        <div class="serif" style="font-size:0.95rem;color:{BROWN}">
+                            {nick(row['home_team'])} {h_score} — {a_score} {nick(row['away_team'])}
+                        </div>
+                        <div class="sans" style="font-size:0.72rem;color:{BROWN_LT};margin-top:2px">
+                            Rd {row['round']} &middot; {row.get('venue','')}
+                        </div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0">
+                        <div class="sans" style="font-size:0.78rem;font-weight:500;color:{BROWN}">{winner}</div>
+                        <div class="sans" style="font-size:0.72rem;color:{BROWN_LT}">by {abs(margin)}</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="empty">No completed matches yet.</div>', unsafe_allow_html=True)
+
+st.divider()
+
 # ── Bookmaker Odds ───────────────────────────────────────────────
 st.markdown(f'<div class="section-label">Market</div>', unsafe_allow_html=True)
 st.markdown("## Bookmaker Odds")
@@ -649,87 +730,6 @@ if not odds_df.is_empty() and not consensus.is_empty() and not best_odds_df.is_e
         store.save_odds_snapshot(odds_df)
 else:
     st.markdown('<div class="empty">Load odds to run edge detection analysis.</div>', unsafe_allow_html=True)
-
-st.divider()
-
-# ── Elo Power Rankings & Results ─────────────────────────────────
-col_left, col_right = st.columns([3, 2])
-
-with col_left:
-    st.markdown(f'<div class="section-label">Ratings</div>', unsafe_allow_html=True)
-    st.markdown("## Elo Power Rankings")
-
-    ratings_df = elo.get_ratings_df()
-    if not ratings_df.is_empty():
-        data = ratings_df.with_row_index("rank", offset=1)
-        min_r = data["elo_rating"].min()
-        max_r = data["elo_rating"].max()
-        spread = max(max_r - min_r, 1)
-
-        # Plotly horizontal bar — clean Aesop styling
-        teams = data["team"].to_list()
-        ratings = data["elo_rating"].to_list()
-        colors = [GREEN if r > 1500 else ROSE if r < 1500 else TAUPE for r in ratings]
-        short_names = [nick(t) for t in teams]
-
-        fig = go.Figure(go.Bar(
-            x=ratings,
-            y=short_names,
-            orientation="h",
-            marker_color=colors,
-            marker_line_width=0,
-            text=[f"{r:.0f}" for r in ratings],
-            textposition="outside",
-            textfont=dict(family="Inter", size=11, color=BROWN),
-        ))
-        fig.update_layout(
-            yaxis=dict(autorange="reversed", tickfont=dict(family="Inter", size=12, color=BROWN)),
-            xaxis=dict(visible=False, range=[min(1440, min_r - 10), max_r + 40]),
-            height=520,
-            margin=dict(l=110, r=50, t=10, b=10),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            bargap=0.35,
-        )
-        fig.add_vline(x=1500, line_dash="dot", line_color=TAUPE, opacity=0.5)
-
-        st.markdown('<div class="card" style="padding:0.75rem 0.5rem">', unsafe_allow_html=True)
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-        st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="empty">No completed matches yet to build ratings.</div>', unsafe_allow_html=True)
-
-with col_right:
-    st.markdown(f'<div class="section-label">Results</div>', unsafe_allow_html=True)
-    st.markdown("## Completed")
-
-    if not completed_df.is_empty():
-        for row in completed_df.sort("kickoff_utc", descending=True).iter_rows(named=True):
-            h_score = int(row["home_score"]) if row["home_score"] is not None else 0
-            a_score = int(row["away_score"]) if row["away_score"] is not None else 0
-            margin = h_score - a_score
-            winner = nick(row["home_team"]) if margin > 0 else nick(row["away_team"]) if margin < 0 else "Draw"
-
-            st.markdown(f"""
-            <div class="card" style="padding:1rem 1.25rem">
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem">
-                    <div style="min-width:0">
-                        <div class="serif" style="font-size:0.95rem;color:{BROWN}">
-                            {nick(row['home_team'])} {h_score} — {a_score} {nick(row['away_team'])}
-                        </div>
-                        <div class="sans" style="font-size:0.72rem;color:{BROWN_LT};margin-top:2px">
-                            Rd {row['round']} &middot; {row.get('venue','')}
-                        </div>
-                    </div>
-                    <div style="text-align:right;flex-shrink:0">
-                        <div class="sans" style="font-size:0.78rem;font-weight:500;color:{BROWN}">{winner}</div>
-                        <div class="sans" style="font-size:0.72rem;color:{BROWN_LT}">by {abs(margin)}</div>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="empty">No completed matches yet.</div>', unsafe_allow_html=True)
 
 # ── Footer ───────────────────────────────────────────────────────
 st.markdown(f"""
