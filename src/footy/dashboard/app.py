@@ -308,15 +308,23 @@ def load_odds(client: OddsAPIClient) -> pl.DataFrame:
 
 
 # ── Helpers ──────────────────────────────────────────────────────
-def fmt_kick(kickoff_local) -> str:
-    if kickoff_local is None:
+def fmt_kick(kickoff_utc) -> str:
+    """Format a UTC kickoff datetime as Sydney local time (DST-aware)."""
+    if kickoff_utc is None:
         return ""
     try:
-        if hasattr(kickoff_local, "strftime"):
-            return kickoff_local.strftime("%a %d %b, %I:%M%p").replace(" 0", " ")
+        import zoneinfo
+        sydney = zoneinfo.ZoneInfo("Australia/Sydney")
+        if hasattr(kickoff_utc, "replace"):
+            # polars returns a datetime; ensure it's treated as UTC then convert
+            import datetime as dt
+            if kickoff_utc.tzinfo is None:
+                kickoff_utc = kickoff_utc.replace(tzinfo=dt.timezone.utc)
+            local = kickoff_utc.astimezone(sydney)
+            return local.strftime("%a %d %b, %I:%M%p").replace(" 0", " ")
     except Exception:
         pass
-    return str(kickoff_local)[:16]
+    return str(kickoff_utc)[:16]
 
 
 def pill(label: str, cls: str) -> str:
@@ -437,7 +445,7 @@ if not round_matches.is_empty():
             <td style="font-weight:500">{nick(row['away_team'])}</td>
             <td class="c">{p}</td>
             <td class="r c-lt" style="font-size:0.76rem">{row.get('venue','')}</td>
-            <td class="r c-lt" style="font-size:0.76rem;white-space:nowrap">{fmt_kick(row.get('kickoff_local'))}</td>
+            <td class="r c-lt" style="font-size:0.76rem;white-space:nowrap">{fmt_kick(row.get('kickoff_utc'))}</td>
         </tr>"""
 
     st.markdown(f"""
