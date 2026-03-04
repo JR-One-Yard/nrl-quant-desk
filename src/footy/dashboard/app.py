@@ -604,7 +604,12 @@ if not odds_df.is_empty():
                 <div class="sans" style="padding:0.75rem 1rem 0.5rem;font-size:0.82rem;font-weight:500;color:{BROWN}">
                     {nick(home)} vs {nick(away)}
                 </div>
-                <table class="t">
+                <table class="t" style="table-layout:fixed;width:100%">
+                    <colgroup>
+                        <col style="width:50%">
+                        <col style="width:25%">
+                        <col style="width:25%">
+                    </colgroup>
                     <thead><tr><th>Bookmaker</th><th class="r">{nick(home)}</th><th class="r">{nick(away)}</th></tr></thead>
                     <tbody>{rows_html}</tbody>
                 </table>
