@@ -58,13 +58,13 @@ st.set_page_config(
     page_title="NRL Quant Trading Desk",
     page_icon="",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 # ── Global CSS ───────────────────────────────────────────────────
 st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Source+Serif+4:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Source+Serif+4:wght@300;400;600&family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1&display=swap');
 
 /* ── Base ────────────────────────────────── */
 .stApp {{ background-color: {CREAM}; }}
@@ -229,10 +229,58 @@ div[data-testid="stTooltipContent"] p {{
     line-height: 1.5 !important;
 }}
 
+/* ── Sidebar toggle icon fix ────────────── */
+button[data-testid="stBaseButton-headerNoPadding"] span,
+button[data-testid="stBaseButton-header"] span,
+[data-testid="stSidebarCollapsedControl"] button span,
+[data-testid="collapsedControl"] button span,
+.stApp header button span {{
+    font-family: 'Material Symbols Rounded' !important;
+}}
+
 /* ── Empty state ─────────────────────────── */
 .empty {{
     text-align: center; padding: 2.5rem 2rem;
     color: {BROWN_LT}; font-family: 'Inter', sans-serif; font-size: 0.88rem;
+}}
+
+/* ── Tablet ─────────────────────────────── */
+@media (max-width: 1024px) {{
+    .stMainBlockContainer {{ max-width: 960px !important; }}
+    .card {{ padding: 1rem 1.25rem; }}
+    .kpi > div {{ min-width: 140px; }}
+    .pb-lbl {{ width: 75px; }}
+}}
+
+/* ── Mobile ──────────────────────────────── */
+@media (max-width: 640px) {{
+    .stMainBlockContainer {{ max-width: 100% !important; padding: 0.75rem !important; }}
+    /* Sidebar — cap width on mobile */
+    section[data-testid="stSidebar"] {{ max-width: 260px; }}
+    section[data-testid="stSidebar"][aria-expanded="true"] {{ min-width: 260px; }}
+    /* Fix broken sidebar toggle icon text */
+    button[data-testid="stBaseButton-headerNoPadding"] {{ font-size: 0 !important; overflow: hidden; width: 2rem; height: 2rem; }}
+    /* Header */
+    .dash-title {{ font-size: 1.5rem !important; }}
+    /* Cards */
+    .card {{ padding: 0.75rem 1rem; }}
+    /* KPI strip — stack vertically */
+    .kpi {{ flex-direction: column; }}
+    .kpi > div {{ border-right: none; border-bottom: 1px solid {BORDER}; }}
+    .kpi > div:last-child {{ border-bottom: none; }}
+    /* Tables — hide venue/kickoff in fixtures */
+    .t-fix th:nth-child(5), .t-fix td:nth-child(5),
+    .t-fix th:nth-child(6), .t-fix td:nth-child(6) {{ display: none; }}
+    /* Edge table — hide book column, smaller font */
+    .t-edge {{ font-size: 0.72rem; }}
+    .t-edge th:nth-child(10), .t-edge td:nth-child(10) {{ display: none; }}
+    /* Prob bar labels */
+    .pb-lbl {{ width: 60px; font-size: 0.72rem; }}
+    .pb-pct {{ width: 40px; font-size: 0.72rem; }}
+    /* Section titles */
+    h2 {{ font-size: 1.25rem !important; }}
+    /* Footer */
+    .footer {{ padding: 1.5rem 0 0.75rem; }}
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -344,7 +392,7 @@ if not odds_df.is_empty():
 
 # ── Header ───────────────────────────────────────────────────────
 st.markdown(f"""
-<div class="serif" style="font-size:2.1rem;color:{BROWN};margin-bottom:0.15rem">NRL Quant Trading Desk</div>
+<div class="serif dash-title" style="font-size:2.1rem;color:{BROWN};margin-bottom:0.15rem">NRL Quant Trading Desk</div>
 <div class="sans" style="font-size:0.82rem;color:{BROWN_LT};margin-bottom:1.5rem">Live market analysis, Elo power ratings &amp; edge detection</div>
 """, unsafe_allow_html=True)
 
@@ -394,7 +442,7 @@ if not round_matches.is_empty():
 
     st.markdown(f"""
     <div class="card" style="padding:0;overflow:hidden">
-        <table class="t">
+        <table class="t t-fix">
             <thead><tr>
                 <th class="r">Home</th><th class="c"></th><th>Away</th>
                 <th class="c">Status</th><th class="r">Venue</th><th class="r">Kickoff</th>
@@ -560,7 +608,7 @@ if not odds_df.is_empty() and not consensus.is_empty() and not best_odds_df.is_e
 
             st.markdown(f"""
             <div class="card edge {border_cls}" style="padding:0;overflow-x:auto">
-                <table class="t">
+                <table class="t t-edge">
                     <thead><tr>
                         <th>Team</th><th>Side</th><th class="r">Model</th><th class="r">Market</th>
                         <th class="r">Edge</th><th class="r">Odds</th><th class="r">EV</th>
@@ -666,7 +714,7 @@ with col_right:
 
 # ── Footer ───────────────────────────────────────────────────────
 st.markdown(f"""
-<div style="text-align:center;padding:2.5rem 0 1rem;font-size:0.7rem;color:{TAUPE};letter-spacing:0.04em;font-family:'Inter',sans-serif">
+<div class="footer" style="text-align:center;padding:2.5rem 0 1rem;font-size:0.7rem;color:{TAUPE};letter-spacing:0.04em;font-family:'Inter',sans-serif">
     NRL Quant Trading Desk &middot; Educational purposes only &middot; Not financial advice
 </div>
 """, unsafe_allow_html=True)
