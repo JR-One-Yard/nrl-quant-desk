@@ -405,7 +405,7 @@ n_books = odds_df["bookmaker"].n_unique() if not odds_df.is_empty() else 0
 st.markdown(f"""
 <div class="kpi">
     <div><div class="kpi-l">Round</div><div class="kpi-v">{selected_round}</div></div>
-    <div><div class="kpi-l">Matches</div><div class="kpi-v">{n_complete_rd} played, {n_sched} upcoming</div></div>
+    <div><div class="kpi-l">Games Played</div><div class="kpi-v">{n_complete_rd} / {n_complete_rd + n_sched}</div></div>
     <div><div class="kpi-l">Data Feed</div><div class="kpi-v">{"Connected" if not fixture_df.is_empty() else "—"}</div></div>
     <div><div class="kpi-l">Bookmakers</div><div class="kpi-v">{n_books if n_books else "—"}</div></div>
     <div><div class="kpi-l">API Quota</div><div class="kpi-v">{quota_str}</div></div>
