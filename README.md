@@ -2,7 +2,7 @@
 
 A Python app that ingests live NRL fixture data and bookmaker odds, runs Elo + market-implied probability models, and displays everything on a professional Streamlit dashboard ("The Wall"). Educational tool for understanding betting market mechanics.
 
-**[Live Dashboard](https://nrl-quant-desk.streamlit.app)**
+**[Live Dashboard](https://jr-one-yard-nrl-quant-desk-srcfootydashboardapp-4kksgi.streamlit.app/)**
 
 ## Methodology
 
