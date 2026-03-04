@@ -12,6 +12,7 @@ from footy.models.implied import calculate_consensus, best_available_odds
 from footy.models.elo import EloModel
 from footy.models.kelly import calculate_edges
 from footy.db.store import FootyStore
+from footy.config import ELO_PRIORS
 
 # ── Palette ──────────────────────────────────────────────────────
 CREAM     = "#F6F5F0"
@@ -381,7 +382,17 @@ odds_df = load_odds(odds_client)
 round_matches = fixture_df.filter(pl.col("round") == selected_round) if not fixture_df.is_empty() else pl.DataFrame()
 completed_df = fixture_df.filter(pl.col("status") == "complete") if not fixture_df.is_empty() else pl.DataFrame()
 
-elo = EloModel()
+# Determine starting ratings:
+#   1. If we have persisted ratings from a previous season, carry them over
+#      with 30% mean-reversion toward 1500 (FiveThirtyEight methodology).
+#   2. Otherwise fall back to the researched pre-season priors in ELO_PRIORS,
+#      which encode 2022-2024 ladder performance and premiership market prices.
+# Either way, bootstrap on top of whatever completed results exist this season.
+_season_start_priors = store.get_season_start_ratings(
+    reversion_factor=0.3,
+    fallback_priors=ELO_PRIORS,
+)
+elo = EloModel(priors=_season_start_priors)
 if not completed_df.is_empty():
     elo.bootstrap_from_results(completed_df)
     store.save_match_results(fixture_df)

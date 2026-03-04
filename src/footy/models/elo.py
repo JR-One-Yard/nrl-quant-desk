@@ -17,10 +17,15 @@ class EloModel:
         k: float = ELO_K,
         home_advantage: float = ELO_HOME_ADVANTAGE,
         initial_rating: float = ELO_INITIAL,
+        priors: dict[str, float] | None = None,
     ) -> None:
         self.k = k
         self.home_advantage = home_advantage
-        self.ratings: dict[str, float] = {t: initial_rating for t in NRL_TEAMS}
+        # Seed each team: use prior if provided, else fall back to initial_rating
+        self.ratings: dict[str, float] = {
+            t: (priors[t] if priors and t in priors else initial_rating)
+            for t in NRL_TEAMS
+        }
 
     def _expected(self, rating_a: float, rating_b: float) -> float:
         """Expected score for team A against team B."""
@@ -81,6 +86,23 @@ class EloModel:
                 int(home_score),
                 int(away_score),
             )
+
+    def mean_revert(self, reversion_factor: float = 0.3) -> dict[str, float]:
+        """Return mean-reverted ratings suitable for seeding the next season.
+
+        Applies the FiveThirtyEight carry-over approach:
+            carried = (ELO_INITIAL * reversion_factor) + (current * (1 - reversion_factor))
+
+        A reversion_factor of 0.3 pulls each team 30% of the way back toward
+        the league average (1500) before the new season begins, preventing
+        historical dominance from compounding indefinitely.
+
+        Returns the reverted ratings dict without mutating self.ratings.
+        """
+        return {
+            team: ELO_INITIAL * reversion_factor + rating * (1.0 - reversion_factor)
+            for team, rating in self.ratings.items()
+        }
 
     def get_ratings_df(self) -> pl.DataFrame:
         """Return ratings as a polars DataFrame sorted by rating descending."""

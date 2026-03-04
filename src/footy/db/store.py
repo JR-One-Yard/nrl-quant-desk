@@ -137,5 +137,38 @@ class FootyStore:
             return {}
         return dict(zip(df["team"].to_list(), df["rating"].to_list()))
 
+    def get_season_start_ratings(
+        self,
+        reversion_factor: float = 0.3,
+        fallback_priors: dict[str, float] | None = None,
+    ) -> dict[str, float]:
+        """Return mean-reverted ratings suitable for seeding a new season.
+
+        Loads the last persisted Elo ratings and applies the FiveThirtyEight
+        carry-over formula:
+            carried = (1500 * reversion_factor) + (current * (1 - reversion_factor))
+
+        If no ratings have been persisted yet (true season start with no prior
+        season data), returns ``fallback_priors`` if supplied, or an empty dict
+        so the caller can fall back to the static ``ELO_PRIORS``.
+
+        Parameters
+        ----------
+        reversion_factor : float
+            Fraction to pull toward the league mean (1500). Default 0.3 matches
+            the FiveThirtyEight methodology (30% regression to mean).
+        fallback_priors : dict[str, float] | None
+            Ratings dict to return when no persisted ratings exist.
+        """
+        saved = self.get_latest_elo_ratings()
+        if not saved:
+            return fallback_priors or {}
+
+        elo_mean = 1500.0
+        return {
+            team: elo_mean * reversion_factor + rating * (1.0 - reversion_factor)
+            for team, rating in saved.items()
+        }
+
     def close(self) -> None:
         self._con.close()
