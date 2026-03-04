@@ -1,4 +1,4 @@
-"""NRL Quant Trading Desk — The Wall."""
+"""NRL Prediction Market Insights — The Wall."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ def nick(name: str) -> str:
 
 # ── Page config ──────────────────────────────────────────────────
 st.set_page_config(
-    page_title="NRL Quant Trading Desk",
+    page_title="NRL Prediction Market Insights",
     page_icon="",
     layout="wide",
     initial_sidebar_state="auto",
@@ -335,7 +335,7 @@ with st.sidebar:
     st.markdown(f"""
     <div style="padding:0.25rem 0 1rem">
         <div class="serif" style="font-size:1.35rem;color:{BROWN}">The Wall</div>
-        <div class="sans" style="font-size:0.68rem;color:{BROWN_LT};letter-spacing:0.08em;text-transform:uppercase">NRL Quant Trading Desk</div>
+        <div class="sans" style="font-size:0.68rem;color:{BROWN_LT};letter-spacing:0.08em;text-transform:uppercase">NRL Prediction Market Insights</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -392,7 +392,7 @@ if not odds_df.is_empty():
 
 # ── Header ───────────────────────────────────────────────────────
 st.markdown(f"""
-<div class="serif dash-title" style="font-size:2.1rem;color:{BROWN};margin-bottom:0.15rem">NRL Quant Trading Desk</div>
+<div class="serif dash-title" style="font-size:2.1rem;color:{BROWN};margin-bottom:0.15rem">NRL Prediction Market Insights</div>
 <div class="sans" style="font-size:0.82rem;color:{BROWN_LT};margin-bottom:1.5rem">Live market analysis, Elo power ratings &amp; edge detection</div>
 """, unsafe_allow_html=True)
 
@@ -715,6 +715,6 @@ with col_right:
 # ── Footer ───────────────────────────────────────────────────────
 st.markdown(f"""
 <div class="footer" style="text-align:center;padding:2.5rem 0 1rem;font-size:0.7rem;color:{TAUPE};letter-spacing:0.04em;font-family:'Inter',sans-serif">
-    NRL Quant Trading Desk &middot; Educational purposes only &middot; Not financial advice
+    NRL Prediction Market Insights &middot; Educational purposes only &middot; Not financial advice
 </div>
 """, unsafe_allow_html=True)

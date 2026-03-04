@@ -1,4 +1,4 @@
-# NRL Quant Trading Desk
+# NRL Prediction Market Insights
 
 A Python app that ingests live NRL fixture data and bookmaker odds, runs Elo + market-implied probability models, and displays everything on a professional Streamlit dashboard ("The Wall"). Educational tool for understanding betting market mechanics.
 
